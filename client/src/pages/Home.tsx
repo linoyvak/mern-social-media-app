@@ -1,4 +1,8 @@
+import React from "react";
 import NavBar from "../components/NavBar";
+import { Box, Flex } from "@chakra-ui/react";
+import LeftBar from "../components/LeftBar.jsx";
+import { Outlet } from "react-router-dom";
 
 const Home = () => {
   return (
@@ -9,7 +13,15 @@ const Home = () => {
       }}
     >
       <NavBar />
-     
+      <Flex>
+        <Box width={"20%"}>
+          <LeftBar />
+        </Box>
+        <Box width={"55%"}>
+          <Outlet />
+        </Box>
+       
+      </Flex>
     </div>
   );
 };
