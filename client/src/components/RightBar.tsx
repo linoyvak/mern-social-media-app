@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Box,
   Text,
@@ -6,10 +5,6 @@ import {
   Avatar,
   Button,
   VStack,
-  Input,
-  useColorModeValue,
-  Heading,
-  Spinner,
 } from "@chakra-ui/react";
 
 const suggestions = [
