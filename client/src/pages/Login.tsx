@@ -11,7 +11,6 @@ import {
   Link,
   Divider,
 } from "@chakra-ui/react";
-import Lottie from "lottie-react";
 
 const Login = () => {
   return (

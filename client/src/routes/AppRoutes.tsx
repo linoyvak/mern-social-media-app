@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Home from "../pages/Home";
+import Feed from "../pages/Feed";
 
 
 export const AppRoutes = () => {
@@ -14,6 +15,8 @@ export const AppRoutes = () => {
       <Route path="/" element={<Home />}>
 
         {/* Nested routes will render inside Feed's Outlet */}
+      <Route path="/" element={<Feed />} />
+
       </Route>
 
 
