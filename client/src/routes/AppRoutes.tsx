@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import Feed from "../pages/Feed";
+import Profile from "../pages/Profile";
 
 export const AppRoutes = () => {
   return (
@@ -15,6 +16,8 @@ export const AppRoutes = () => {
       <Route element={<ProtectedRoute element={<Home />} />}>
         {/* Nested routes will render inside Feed's Outlet */}
         <Route path="/" element={<Feed />} />
+        <Route path="/profile" element={<Profile />} />
+
       </Route>
 
       {/* Fallback redirect */}
