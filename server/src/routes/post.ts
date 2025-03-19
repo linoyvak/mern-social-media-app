@@ -65,6 +65,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// ✅ Like a post
 router.put(
   "/like/:postId",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -96,6 +97,7 @@ router.put(
   }
 );
 
+// ✅ Comment on a post
 router.post(
   "/comment/:postId",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -123,6 +125,22 @@ router.post(
       post.comments.push(comment);
       await post.save();
       res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ✅ Fetch posts by a specific user
+router.get(
+  "/user/:userId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log("📥 Received request to fetch user posts"); // ✅ Log request data for debugging
+    try {
+      const posts = await Post.find({ user: req.params.userId }).sort({
+        createdAt: -1,
+      });
+      res.json(posts);
     } catch (error) {
       next(error);
     }
