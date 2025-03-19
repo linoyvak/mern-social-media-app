@@ -17,11 +17,23 @@ import {
   MdOutlineNotifications,
 } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../store/actions/authActions";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 const NavBar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
 
+  const auth = useSelector((state: RootState) => state.auth);
+
+  const currentUser = auth.user;
 
   return (
     <Flex
@@ -99,6 +111,7 @@ const NavBar = () => {
         <Icon as={MdOutlineEmail as any} w={5} h={5} cursor="pointer" />
         <Icon as={MdOutlineNotifications as any} w={5} h={5} cursor="pointer" />
         <Icon
+          onClick={handleLogout}
           as={IoLogOutOutline as any}
           w={5}
           h={5}
@@ -115,15 +128,18 @@ const NavBar = () => {
             w="30px"
             h="30px"
             borderRadius="50%"
-            
+            backgroundImage={`url(${
+              currentUser?.profileImage || "/default-avatar.png"
+            })`}
             backgroundSize="cover"
             backgroundPosition="center"
             border={"1px solid lightgray"}
           />
           <Text fontSize="sm" fontWeight="medium">
+            {currentUser?.username || "User"}
           </Text>
         </Flex>
-    
+       
       </Flex>
     </Flex>
   );
