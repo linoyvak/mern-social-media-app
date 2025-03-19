@@ -12,8 +12,14 @@ import {
   Input,
   FormControl,
   FormLabel,
-  Textarea,
 } from "@chakra-ui/react";
+
+import { useEffect } from "react";
+import { RootState } from "../store/store";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { fetchUserPosts } from "../store/actions/postActions";
+
 
 const mockUser = {
   username: "John Doe",
@@ -39,8 +45,20 @@ const mockPosts = [
 ];
 
 const Profile: React.FC = () => {
+  
   const [username, setUsername] = useState(mockUser.username);
   const [email, setEmail] = useState(mockUser.email);
+
+  const dispatch = useDispatch<any>();
+  const auth = useSelector((state: RootState) => state.auth);
+  const userPosts = useSelector((state: RootState) => state.post.userPosts);
+
+  useEffect(() => {
+    if (auth.user) {
+      dispatch(fetchUserPosts(auth?.user._id));
+    }
+  }, [dispatch, auth.user]);
+
 
   return (
     <Box>
@@ -83,26 +101,58 @@ const Profile: React.FC = () => {
 
           <Divider my={6} />
 
-          {/* User's Posts */}
-          <Box>
+            {/* User's Posts */}
+            <Box>
             <Heading as="h3" size="md" mb={4}>
               Your Posts
             </Heading>
             <Stack spacing={4}>
-              {mockPosts.length === 0 ? (
+              {userPosts.length === 0 ? (
                 <Text color="gray.500">You haven't posted anything yet.</Text>
               ) : (
-                mockPosts.map((post) => (
-                  <Box key={post.id} bg="white" p={4} borderRadius="md" boxShadow="sm">
+                userPosts.map((post) => (
+                  <Box
+                    key={post._id}
+                    bg="white"
+                    p={4}
+                    borderRadius="md"
+                    boxShadow="sm"
+                  >
                     <Flex align="center" mb={2}>
                       <Avatar size="sm" src={post.avatar} mr={2} />
                       <Text fontWeight="bold">{post.username}</Text>
                     </Flex>
 
-                    <Text mb={2}>{post.content}</Text>
-                    {post.image && (
-                      <Image height="200px" width="100%" src={post.image} alt="Post Image" borderRadius="md" mb={2} />
-                    )}
+                    <>
+                        <Text mb={2}>{post.content}</Text>
+                        {post.image && (
+                          <Image
+                            height="200px"
+                            width="100%"
+                            src={`http://localhost:5000${post.image}`}
+                            alt="User Post"
+                            borderRadius="md"
+                            mb={2}
+                          />
+                        )}
+                        <Flex gap={2}>
+                          <Button
+                            size="sm"
+                            colorScheme="blue"
+                          
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            colorScheme="red"
+                          >
+                            Delete
+                          </Button>
+                        </Flex>
+                      </>
+
+                 
                   </Box>
                 ))
               )}

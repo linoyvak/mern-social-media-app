@@ -5,6 +5,7 @@ export const FETCH_POSTS = "FETCH_POSTS";
 export const ADD_POST = "ADD_POST";
 export const LIKE_POST = "LIKE_POST";
 export const COMMENT_POST = "COMMENT_POST";
+export const FETCH_USER_POSTS = "FETCH_USER_POSTS";
 
 // Fetch all posts
 export const fetchPosts = () => async (dispatch: Dispatch) => {
@@ -76,3 +77,13 @@ export const commentPost =
 
     dispatch({ type: COMMENT_POST, payload: data });
   };
+
+
+  // Fetch posts by user
+export const fetchUserPosts =
+(userId: string) => async (dispatch: Dispatch) => {
+  const { data } = await axios.get(
+    `http://localhost:5000/api/posts/user/${userId}`
+  );
+  dispatch({ type: FETCH_USER_POSTS, payload: data });
+};

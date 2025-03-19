@@ -3,6 +3,7 @@ import {
   FETCH_POSTS,
   LIKE_POST,
   COMMENT_POST,
+  FETCH_USER_POSTS,
 } from "../actions/postActions";
 
 interface Post {
@@ -55,6 +56,10 @@ export const postReducer = (state = initialState, action: any): PostState => {
         ),
       };
 
+
+      case FETCH_USER_POSTS:
+        return { ...state, userPosts: action.payload };
+  
    
     default:
       return state;
