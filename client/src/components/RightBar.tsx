@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Text,
@@ -5,6 +6,10 @@ import {
   Avatar,
   Button,
   VStack,
+  Input,
+  useColorModeValue,
+  Heading,
+  Spinner,
 } from "@chakra-ui/react";
 
 const suggestions = [
@@ -37,6 +42,117 @@ const latestActivities = [
   },
 ];
 
+const onlineFriends = [
+  {
+    name: "Alice",
+    image:
+      "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  },
+  {
+    name: "Bob",
+    image:
+      "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  },
+  {
+    name: "Charlie",
+    image:
+      "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  },
+  {
+    name: "David",
+    image:
+      "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  },
+];
+
+const ChatGPTBox = () => {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [displayedAnswer, setDisplayedAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAsk = async () => {
+    // אתחול סטייטים לפני שליחת השאלה
+    setLoading(true);
+    setAnswer("");
+    setDisplayedAnswer("");
+    try {
+      const response = await fetch("http://localhost:5000/api/chatgpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const data = await response.json();
+      setAnswer(data.answer);
+    } catch (error) {
+      console.error("Error:", error);
+      setAnswer("אירעה שגיאה, אנא נסה שוב.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // אפקט "הקלדה" - מציג את התשובה בהדרגה, אות אחרי אות
+  useEffect(() => {
+    if (answer) {
+      let index = 0;
+      setDisplayedAnswer("");
+      const interval = setInterval(() => {
+        setDisplayedAnswer((prev) => prev + answer[index]);
+        index++;
+        if (index >= answer.length) {
+          clearInterval(interval);
+        }
+      }, 30); // עיכוב של 30ms לכל אות (ניתן להתאים)
+      return () => clearInterval(interval);
+    }
+  }, [answer]);
+
+  return (
+    <Box
+      maxW="400px"
+      p={6}
+      bg={useColorModeValue("white", "gray.800")}
+      borderRadius="lg"
+      boxShadow="lg"
+      mt={6}
+    >
+      <Heading as="h3" size="md" mb={4} textAlign="left">
+        Ask ChatGPT
+      </Heading>
+      <VStack spacing={4}>
+        <Input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          size="md"
+          placeholder="Type your question here..."
+        />
+        <Button
+          w="full"
+          colorScheme="blue"
+          onClick={handleAsk}
+          _hover={{ bg: "blue.600" }}
+          isDisabled={loading || !question.trim()}
+        >
+          {loading ? <Spinner size="sm" color="white" /> : "שלח"}
+        </Button>
+        {/* ניתן להוסיף Spinner נוסף למקרה שהטעינה ארוכה */}
+        {loading && (
+          <Box>
+            <Spinner size="md" />
+          </Box>
+        )}
+        {displayedAnswer && (
+          <Box w="full" p={4} borderRadius="md" borderWidth="1px">
+            <Text fontSize="sm" whiteSpace="pre-wrap">
+              {displayedAnswer}
+            </Text>
+          </Box>
+        )}
+      </VStack>
+    </Box>
+  );
+};
 
 const RightBar = () => {
   return (
@@ -142,6 +258,11 @@ const RightBar = () => {
             </Flex>
           ))}
         </Box>
+
+
+
+        {/* ChatGPT Integration */}
+        <ChatGPTBox />
       </VStack>
     </Box>
   );
