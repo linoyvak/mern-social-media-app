@@ -1,6 +1,8 @@
 import {
   ADD_POST,
   FETCH_POSTS,
+  LIKE_POST,
+  COMMENT_POST,
 } from "../actions/postActions";
 
 interface Post {
@@ -35,9 +37,25 @@ export const postReducer = (state = initialState, action: any): PostState => {
   switch (action.type) {
     case FETCH_POSTS:
       return { ...state, posts: action.payload };
-      case ADD_POST:
-        return { ...state, posts: [action.payload, ...state.posts] };
-  
+
+
+
+    case ADD_POST:
+      return { ...state, posts: [action.payload, ...state.posts] };
+
+ 
+
+
+    case LIKE_POST:
+    case COMMENT_POST:
+      return {
+        ...state,
+        posts: state.posts.map((post) =>
+          post._id === action.payload._id ? action.payload : post
+        ),
+      };
+
+   
     default:
       return state;
   }
