@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Flex,
@@ -13,29 +12,29 @@ import { FcLike } from "react-icons/fc";
 import { MdOutlineInsertComment } from "react-icons/md";
 import { BsShare } from "react-icons/bs";
 
-// Mock Data for Posts
 const mockPosts = [
-  {
-    id: "1",
-    username: "John Doe",
-    profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-    content: "Just had an amazing trip to the mountains! 🏔️",
-    image: "https://source.unsplash.com/random/800x600?nature,water",
-    likes: 23,
-    comments: 5,
-    createdAt: "2024-03-18T12:00:00Z",
-  },
-  {
-    id: "2",
-    username: "Jane Smith",
-    profileImage: "https://randomuser.me/api/portraits/women/50.jpg",
-    content: "Enjoying my morning coffee ☕",
-    image: "https://source.unsplash.com/random/800x600?coffee",
-    likes: 42,
-    comments: 8,
-    createdAt: "2024-03-19T08:30:00Z",
-  },
-];
+    {
+      id: "1",
+      username: "John Doe",
+      profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
+      content: "Just had an amazing trip to the mountains! 🏔️",
+      image: "https://picsum.photos/800/600?random=1", // ✅ More reliable image
+      likes: 23,
+      comments: 5,
+      createdAt: "2024-03-18T12:00:00Z",
+    },
+    {
+      id: "2",
+      username: "Jane Smith",
+      profileImage: "https://randomuser.me/api/portraits/women/50.jpg",
+      content: "Enjoying my morning coffee ☕",
+      image: "https://picsum.photos/800/600?random=2", // ✅ More reliable image
+      likes: 42,
+      comments: 8,
+      createdAt: "2024-03-19T08:30:00Z",
+    },
+  ];
+  
 
 const Posts = () => {
   return (
