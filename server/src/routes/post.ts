@@ -65,6 +65,70 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.put(
+  "/like/:postId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      const likeIndex = post.likes.indexOf(userId);
+      if (likeIndex !== -1) {
+        post.likes.splice(likeIndex, 1);
+      } else {
+        post.likes.push(userId);
+      }
+
+      await post.save();
+      res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  "/comment/:postId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { userId, username, avatar, text } = req.body;
+      if (!userId || !username || !text) {
+        res.status(400).json({ message: "Missing required fields" });
+        return;
+      }
+
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      const comment = {
+        user: userId,
+        username,
+        avatar,
+        text,
+        createdAt: new Date(),
+      };
+
+      post.comments.push(comment);
+      await post.save();
+      res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 
 
 export default router;
