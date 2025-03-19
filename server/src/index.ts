@@ -1,7 +1,8 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import cors from "cors";
-import path from "path";
+import authRoutes from "./routes/auth";
 
 
 dotenv.config();
@@ -14,8 +15,21 @@ app.use(cors());
 app.use(express.json()); // ✅ Required for parsing JSON requests
 app.use(express.urlencoded({ extended: true })); // ✅ Required for handling form data
 
-// ✅ Serve uploaded images as static files
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+// MongoDB Connection
+mongoose
+  .connect(
+    process.env.MONGO_URI as string,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    } as any
+  )
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.log("❌ MongoDB connection error:", err));
+
+// Routes
+app.use("/api/auth", authRoutes);
 
 
 app.get("/", (req, res) => {
