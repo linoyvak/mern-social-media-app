@@ -1,104 +1,242 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Flex,
   Stack,
   Text,
   Avatar,
+  Button,
   Image,
+  useDisclosure,
+  Input,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
   Icon,
-  Divider,
 } from "@chakra-ui/react";
+import { useColorModeValue } from "@chakra-ui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import {
+  commentPost,
+  fetchPosts,
+  likePost,
+} from "../store/actions/postActions";
 import { FcLike } from "react-icons/fc";
-import { MdOutlineInsertComment } from "react-icons/md";
 import { BsShare } from "react-icons/bs";
-
-const mockPosts = [
-    {
-      id: "1",
-      username: "John Doe",
-      profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-      content: "Just had an amazing trip to the mountains! 🏔️",
-      image: "https://picsum.photos/800/600?random=1", // ✅ More reliable image
-      likes: 23,
-      comments: 5,
-      createdAt: "2024-03-18T12:00:00Z",
-    },
-    {
-      id: "2",
-      username: "Jane Smith",
-      profileImage: "https://randomuser.me/api/portraits/women/50.jpg",
-      content: "Enjoying my morning coffee ☕",
-      image: "https://picsum.photos/800/600?random=2", // ✅ More reliable image
-      likes: 42,
-      comments: 8,
-      createdAt: "2024-03-19T08:30:00Z",
-    },
-  ];
-  
+import { MdOutlineInsertComment } from "react-icons/md";
 
 const Posts = () => {
+  const posts = useSelector((state: RootState) => state.post.posts);
+  const [visibleCount, setVisibleCount] = useState<number>(2);
+  const avatarShadow = useColorModeValue(
+    "0px 0px 5px 0px rgba(0,0,0,0.2)",
+    "none"
+  );
+  const auth = useSelector((state: RootState) => state.auth);
+
+  const dispatch = useDispatch<any>();
+  const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    dispatch(fetchPosts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100
+      ) {
+        if (visibleCount < posts.length && !loadingMore) {
+          setLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) => Math.min(prev + 1, posts.length));
+            setLoadingMore(false);
+          }, 1500); // דילאי קצר של 300 מילי-שניות
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [posts.length, visibleCount, loadingMore]);
+
+  const openCommentsModal = (post: any) => {
+    setSelectedPost(post);
+    onOpen();
+  };
+
+  const handleLike = (postId: string) => {
+    dispatch(likePost(postId));
+  };
+
+  const handleCommentSubmit = (postId: string) => {
+    if (!commentText[postId]?.trim()) return;
+    dispatch(commentPost(postId, commentText[postId]));
+    setCommentText((prev) => ({ ...prev, [postId]: "" }));
+    onClose();
+  };
+
   return (
-    <Stack spacing={4} py={5}>
-      {mockPosts.length === 0 ? (
+    <Stack>
+      {posts.length === 0 ? (
         <Text textAlign="center" color="gray.500">
           No posts uploaded!
         </Text>
       ) : (
-        mockPosts.map((post) => (
-          <Box key={post.id} px={7} py={1}>
+        posts.slice(0, visibleCount).map((post: any) => (
+          <Box px={7} py={1}>
             <Box
               px={4}
               py={6}
               bg="white"
               borderRadius="20px"
-              boxShadow="0px 0px 5px 0px rgba(0,0,0,0.2)"
+              boxShadow={"0px 0px 5px 0px rgba(0,0,0,0.2)"}
             >
-              {/* User Info */}
-              <Flex mb={2} align="center">
-                <Avatar size="sm" name={post.username} src={post.profileImage} mr={2} />
-                <Box>
-                  <Text fontWeight="bold" fontSize="sm" color="gray.600">
+              <Flex mb={2}>
+                <Avatar
+                  size="sm"
+                  name={auth.user?.username || "User Name"}
+                  src={auth.user?.profileImage || "/path/to/profile.jpg"}
+                  mr={2}
+                  p={"5px"}
+                  boxShadow={avatarShadow}
+                />
+
+                <Box mb={2}>
+                  <Text fontWeight="bold" fontSize="sm" color="gray.600" mr={2}>
                     {post.username}
                   </Text>
-                  <Text fontSize="xs" color="gray.500">
-                    {new Date(post.createdAt).toLocaleDateString()} / {new Date(post.createdAt).toLocaleTimeString()}
+                  <Text fontSize="sm" color="gray.500">
+                    {new Date(post.createdAt).toLocaleDateString()} /{" "}
+                    {new Date(post.createdAt).toLocaleTimeString()}
                   </Text>
                 </Box>
               </Flex>
-
-              {/* Post Content */}
-              <Text fontSize="sm" mb={2}>
+              <Text fontFamily={"body"} fontSize={"sm"} mb={2}>
                 {post.content}
               </Text>
               {post.image && (
-                <Image src={post.image} alt="Post Image" borderRadius="md" h="300px" w="100%" mb={2} />
+                <Image
+                  src={`http://localhost:5000${post.image}`}
+                  alt="User Post"
+                  borderRadius="md"
+                  h={"300px"}
+                  w={"100%"}
+                  mb={2}
+                />
               )}
 
-              {/* Post Actions */}
-              <Divider my={3} />
-              <Flex align="center" gap={5}>
-                {/* Like */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={FcLike as any} w={6} h={6} />
-                  <Text fontSize="sm">Like ({post.likes})</Text>
+              <Flex align={"center"} gap={5}>
+                {/* like */}
+                <Flex gap={2} align="center">
+                  <Icon
+                    onClick={() => handleLike(post._id)}
+                    as={FcLike as any}
+                    w={6}
+                    h={6}
+                    cursor="pointer"
+                  />
+                  {post.likes.includes(auth.user?._id) ? "Unlike" : "Like"} (
+                  {post.likes.length})
                 </Flex>
 
-                {/* Comment */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={MdOutlineInsertComment as any} w={5} h={5} />
-                  <Text fontSize="sm">Comment ({post.comments})</Text>
+                {/* comment */}
+                <Flex gap={2} mt={1} align="center">
+                  <Icon
+                    onClick={() => openCommentsModal(post)}
+                    as={MdOutlineInsertComment as any}
+                    w={5}
+                    h={5}
+                    cursor="pointer"
+                  />
+                  <Text onClick={() => openCommentsModal(post)}>
+                    {post.comments.length}
+                  </Text>
                 </Flex>
 
-                {/* Share */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={BsShare as any} w={4} h={4} />
-                  <Text fontSize="sm">Share</Text>
+                {/* share */}
+
+                <Flex gap={2} mt={1} align="center">
+                  <Icon as={BsShare as any} w={4} h={4} cursor="pointer" />
+                  Share
                 </Flex>
+              </Flex>
+
+              <Flex align={"center"} mt={2}>
+                <Input
+                  h={"30px"}
+                  borderRadius={"20px"}
+                  placeholder="Write a comment..."
+                  value={commentText[selectedPost?._id] || ""}
+                  onChange={(e) =>
+                    setCommentText((prev) => ({
+                      ...prev,
+                      [selectedPost._id]: e.target.value,
+                    }))
+                  }
+                />
+                <Button
+                  ml={2}
+                  size="sm"
+                  colorScheme="blue"
+                  borderRadius={"20px"}
+                  onClick={() => handleCommentSubmit(selectedPost._id)}
+                >
+                  Comment
+                </Button>
               </Flex>
             </Box>
           </Box>
         ))
       )}
+      {/* הודעת טעינה כאשר בטעינה */}
+      {loadingMore && (
+        <Box textAlign="center" p={4}>
+          <Text fontSize="md" color="gray.600">
+            טוען פוסטים נוספים...
+          </Text>
+        </Box>
+      )}
+
+      {/* Comments Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Comments</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedPost && (
+              <Stack spacing={3}>
+                {selectedPost.comments.map((comment: any) => (
+                  <Flex
+                    key={comment.createdAt}
+                    align="center"
+                    bg="gray.100"
+                    p={2}
+                    borderRadius="md"
+                  >
+                    <Avatar size="xs" src={comment.avatar} mr={2} />
+                    <Box>
+                      <Text fontSize="sm" fontWeight="bold">
+                        {comment.username}
+                      </Text>
+                      <Text fontSize="sm">{comment.text}</Text>
+                    </Box>
+                  </Flex>
+                ))}
+              </Stack>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Stack>
   );
 };

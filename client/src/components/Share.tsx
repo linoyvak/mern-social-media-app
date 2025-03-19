@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Flex,
@@ -8,22 +9,37 @@ import {
   Divider,
   Text,
 } from "@chakra-ui/react";
-
-// Mock Images for Icons
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { useDispatch } from "react-redux";
+import { addPost } from "../store/actions/postActions";
 import img from "../assets/img2.png";
 import img2 from "../assets/map.png";
 import img3 from "../assets/friend.png";
 
-
-
 const Share = () => {
-    
-// Mock Data for User Profile
-const mockUser = {
-    username: "John Doe",
-    profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
+  const [postContent, setPostContent] = React.useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const auth = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<any>();
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
-  
+
+  const handlePostSubmit = () => {
+    if (!postContent.trim()) return;
+    dispatch(addPost(postContent, imageFile));
+    setPostContent("");
+    setImagePreview(null);
+    setImageFile(null);
+  };
+
   return (
     <Box px={7} py={5}>
       <Box
@@ -31,58 +47,95 @@ const mockUser = {
         py={6}
         bg="white"
         borderRadius="20px"
-        boxShadow="0px 0px 5px 0px rgba(0,0,0,0.2)"
+        boxShadow={"0px 0px 5px 0px rgba(0,0,0,0.2)"}
       >
-        {/* Input Section */}
-        <Flex align="center" bg="white">
+        <Flex align={"center"} bg="white">
           <Avatar
             size="md"
-            name={mockUser.username}
-            src={mockUser.profileImage}
+            name={auth.user?.username || "User Name"}
+            src={auth.user?.profileImage || "/path/to/profile.jpg"}
             mr={2}
-            p="5px"
+            p={"5px"}
             boxShadow="md"
           />
           <Input
             placeholder="What's on your mind?"
             border="none"
-            bg="white"
+            bg={"white"}
             _focus={{ bg: "none", borderColor: "white" }}
             borderRadius="2px"
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
           />
         </Flex>
-
         <Divider my={4} height="1px" backgroundColor="lightgray" />
+        {imagePreview && (
+          <Box mb={3}>
+            <Image
+                              h={"400px"}
+                              w={"100%"}
+            
+            src={imagePreview} alt="Preview" borderRadius="md" />
+          </Box>
+        )}
 
-        {/* Action Buttons Section */}
         <Flex justify="space-between">
           <Flex gap={5} align="center">
-            {/* Add Image Button */}
-            <Flex as="label" align="center" cursor="pointer">
-              <Image src={img} alt="Add Image" boxSize="20px" mr={2} />
-              <Text fontSize="sm" color="gray.500">Add Image</Text>
-            </Flex>
+            <Flex as="label" align={"center"}>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                display="none"
+              />
 
-            {/* Add Place Button */}
-            <Flex align="center" cursor="pointer">
-              <Image src={img2} alt="Add Place" boxSize="20px" mr={2} />
-              <Text fontSize="sm" color="gray.500">Add Place</Text>
+              <Image
+                src={imagePreview || img}
+                alt="Preview"
+                borderRadius="md"
+                width="15px"
+                height="15px"
+                mr={2}
+                cursor="pointer"
+              />
+              <Text cursor={"pointer"} fontSize="sm" color="gray.500">
+                Add Image
+              </Text>
             </Flex>
-
-            {/* Tag Friends Button */}
-            <Flex align="center" cursor="pointer">
-              <Image src={img3} alt="Tag Friends" boxSize="20px" mr={2} />
-              <Text fontSize="sm" color="gray.500">Tag Friends</Text>
+            <Flex align={"center"}>
+              <Image
+                src={img2}
+                alt="Preview"
+                borderRadius="md"
+                width="15px"
+                height="15px"
+                mr={2}
+              />
+              <Text fontSize="sm" color="gray.500">
+                Add Place
+              </Text>
+            </Flex>
+            <Flex align={"center"}>
+              <Image
+                src={img3}
+                alt="Preview"
+                borderRadius="md"
+                width="15px"
+                height="15px"
+                mr={2}
+              />
+              <Text fontSize="sm" color="gray.500">
+                Tag Friends
+              </Text>
             </Flex>
           </Flex>
-
-          {/* Share Button */}
           <Button
             colorScheme="blue"
-            fontSize="sm"
-            bg="purple.300"
-            rounded="2px"
-            h="30px"
+            fontSize={"sm"}
+            bg={"purple.300"}
+            rounded={"2px"}
+            h={"30px"}
+            onClick={handlePostSubmit}
           >
             Share
           </Button>
