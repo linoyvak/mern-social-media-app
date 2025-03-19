@@ -2,8 +2,10 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
-import axios from 'axios'
 import authRoutes from "./routes/auth";
+import postRoutes from "./routes/post";
+import path from "path";
+import axios from "axios";
 
 
 dotenv.config();
@@ -15,6 +17,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json()); // ✅ Required for parsing JSON requests
 app.use(express.urlencoded({ extended: true })); // ✅ Required for handling form data
+
+// ✅ Serve uploaded images as static files
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 
 // MongoDB Connection
@@ -31,6 +36,8 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
+
 // ChatGPT Integration Endpoint
 app.post("/api/chatgpt", async (req: Request, res: Response): Promise<void> => {
   const { question } = req.body;
