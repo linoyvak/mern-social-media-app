@@ -1,104 +1,146 @@
+import { useEffect } from "react";
 import {
   Box,
   Flex,
   Stack,
   Text,
   Avatar,
+  Button,
   Image,
+  Input,
   Icon,
-  Divider,
 } from "@chakra-ui/react";
+import { useColorModeValue } from "@chakra-ui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import {
+  fetchPosts,
+} from "../store/actions/postActions";
 import { FcLike } from "react-icons/fc";
-import { MdOutlineInsertComment } from "react-icons/md";
 import { BsShare } from "react-icons/bs";
-
-const mockPosts = [
-    {
-      id: "1",
-      username: "John Doe",
-      profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-      content: "Just had an amazing trip to the mountains! 🏔️",
-      image: "https://picsum.photos/800/600?random=1", // ✅ More reliable image
-      likes: 23,
-      comments: 5,
-      createdAt: "2024-03-18T12:00:00Z",
-    },
-    {
-      id: "2",
-      username: "Jane Smith",
-      profileImage: "https://randomuser.me/api/portraits/women/50.jpg",
-      content: "Enjoying my morning coffee ☕",
-      image: "https://picsum.photos/800/600?random=2", // ✅ More reliable image
-      likes: 42,
-      comments: 8,
-      createdAt: "2024-03-19T08:30:00Z",
-    },
-  ];
-  
+import { MdOutlineInsertComment } from "react-icons/md";
 
 const Posts = () => {
+  const posts = useSelector((state: RootState) => state.post.posts);
+  const avatarShadow = useColorModeValue(
+    "0px 0px 5px 0px rgba(0,0,0,0.2)",
+    "none"
+  );
+  const auth = useSelector((state: RootState) => state.auth);
+
+  const dispatch = useDispatch<any>();
+
+  useEffect(() => {
+    dispatch(fetchPosts());
+  }, [dispatch]);
+
+
+
   return (
-    <Stack spacing={4} py={5}>
-      {mockPosts.length === 0 ? (
+    <Stack>
+      {posts?.length === 0 ? (
         <Text textAlign="center" color="gray.500">
           No posts uploaded!
         </Text>
       ) : (
-        mockPosts.map((post) => (
-          <Box key={post.id} px={7} py={1}>
+        posts?.map((post: any) => (
+          <Box px={7} py={1}>
             <Box
               px={4}
               py={6}
               bg="white"
               borderRadius="20px"
-              boxShadow="0px 0px 5px 0px rgba(0,0,0,0.2)"
+              boxShadow={"0px 0px 5px 0px rgba(0,0,0,0.2)"}
             >
-              {/* User Info */}
-              <Flex mb={2} align="center">
-                <Avatar size="sm" name={post.username} src={post.profileImage} mr={2} />
-                <Box>
-                  <Text fontWeight="bold" fontSize="sm" color="gray.600">
+              <Flex mb={2}>
+                <Avatar
+                  size="sm"
+                  name={auth.user?.username || "User Name"}
+                  src={auth.user?.profileImage || "/path/to/profile.jpg"}
+                  mr={2}
+                  p={"5px"}
+                  boxShadow={avatarShadow}
+                />
+
+                <Box mb={2}>
+                  <Text fontWeight="bold" fontSize="sm" color="gray.600" mr={2}>
                     {post.username}
                   </Text>
-                  <Text fontSize="xs" color="gray.500">
-                    {new Date(post.createdAt).toLocaleDateString()} / {new Date(post.createdAt).toLocaleTimeString()}
+                  <Text fontSize="sm" color="gray.500">
+                    {new Date(post.createdAt).toLocaleDateString()} /{" "}
+                    {new Date(post.createdAt).toLocaleTimeString()}
                   </Text>
                 </Box>
               </Flex>
-
-              {/* Post Content */}
-              <Text fontSize="sm" mb={2}>
+              <Text fontFamily={"body"} fontSize={"sm"} mb={2}>
                 {post.content}
               </Text>
               {post.image && (
-                <Image src={post.image} alt="Post Image" borderRadius="md" h="300px" w="100%" mb={2} />
+                <Image
+                  src={`http://localhost:5000${post.image}`}
+                  alt="User Post"
+                  borderRadius="md"
+                  h={"300px"}
+                  w={"100%"}
+                  mb={2}
+                />
               )}
 
-              {/* Post Actions */}
-              <Divider my={3} />
-              <Flex align="center" gap={5}>
-                {/* Like */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={FcLike as any} w={6} h={6} />
-                  <Text fontSize="sm">Like ({post.likes})</Text>
+              <Flex align={"center"} gap={5}>
+                {/* like */}
+                <Flex gap={2} align="center">
+                  <Icon
+                    as={FcLike as any}
+                    w={6}
+                    h={6}
+                    cursor="pointer"
+                  />
+                  {post.likes.includes(auth.user?._id) ? "Unlike" : "Like"} (
+                  {post.likes.length})
                 </Flex>
 
-                {/* Comment */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={MdOutlineInsertComment as any} w={5} h={5} />
-                  <Text fontSize="sm">Comment ({post.comments})</Text>
+                {/* comment */}
+                <Flex gap={2} mt={1} align="center">
+                  <Icon
+                    as={MdOutlineInsertComment as any}
+                    w={5}
+                    h={5}
+                    cursor="pointer"
+                  />
+                  <Text >
+                    {post.comments.length}
+                  </Text>
                 </Flex>
 
-                {/* Share */}
-                <Flex gap={2} align="center" cursor="pointer">
-                  <Icon as={BsShare as any} w={4} h={4} />
-                  <Text fontSize="sm">Share</Text>
+                {/* share */}
+
+                <Flex gap={2} mt={1} align="center">
+                  <Icon as={BsShare as any} w={4} h={4} cursor="pointer" />
+                  Share
                 </Flex>
+              </Flex>
+
+              <Flex align={"center"} mt={2}>
+                <Input
+                  h={"30px"}
+                  borderRadius={"20px"}
+                  placeholder="Write a comment..."
+                />
+                <Button
+                  ml={2}
+                  size="sm"
+                  colorScheme="blue"
+                  borderRadius={"20px"}
+                >
+                  Comment
+                </Button>
               </Flex>
             </Box>
           </Box>
         ))
       )}
+    
+ 
     </Stack>
   );
 };
