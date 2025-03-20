@@ -147,6 +147,7 @@ router.get(
   }
 );
 
+// ✅ Delete a post
 router.delete(
   "/:postId",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -165,6 +166,30 @@ router.delete(
   }
 );
 
+// ✅ Update a post
+router.put(
+  "/:postId",
+  upload.single("image"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      const { content } = req.body;
+      const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+      post.content = content;
+      post.image = imagePath || post.image;
+      await post.save();
+      res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 
 export default router;
