@@ -3,13 +3,17 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/User";
+import multer from "multer";
+import path from "path";
 import admin from "firebase-admin";
+import { Post } from "../models/Post";
+
 
 dotenv.config();
 const router = express.Router();
 
 
-// Initialize Firebase Admin if not already initialized
+// Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -20,6 +24,22 @@ if (!admin.apps.length) {
     }),
   });
 }
+
+
+// ✅ Configure Multer for profile image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/profiles"); // Ensure this folder exists
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
+});
+
+const upload = multer({ storage }); // ✅ Define `upload` here before using it
 
 const generateAccessToken = (user: any): string => {
   return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET!, {
@@ -135,6 +155,7 @@ router.post("/logout", (req: Request, res: Response) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
+// ✅ Google OAuth
 router.post(
   "/google",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -172,5 +193,57 @@ router.post(
   }
 );
 
+router.put(
+  "/update-profile/:userId",
+  upload.single("profileImage"),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId } = req.params;
+      const { username, email } = req.body;
+
+      // Ensure username is unique
+      const existingUser = await User.findOne({ username });
+      if (existingUser && existingUser._id.toString() !== userId) {
+        res.status(400).json({ message: "Username already in use" });
+        return;
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      const oldUsername = user.username;
+      const oldProfileImage = user.profileImage;
+
+      user.username = username || user.username;
+      if (req.file) {
+        user.profileImage = `/uploads/profiles/${req.file.filename}`;
+      }
+
+      await user.save();
+
+      // Update username and profile image in all posts
+      if (username && username !== oldUsername) {
+        await Post.updateMany(
+          { "user": userId },
+          { $set: { "username": username } }
+        );
+      }
+
+      if (req.file && user.profileImage !== oldProfileImage) {
+        await Post.updateMany(
+          { "user": userId },
+          { $set: { "profileImage": user.profileImage } }
+        );
+      }
+
+      res.json({ message: "Profile updated successfully", user });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
+  }
+);
 
 export default router;
