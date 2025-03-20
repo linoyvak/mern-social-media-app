@@ -13,13 +13,14 @@ import {
   FormControl,
   FormLabel,
   useToast,
+  Textarea,
 } from "@chakra-ui/react";
 
 import { useEffect } from "react";
 import { RootState } from "../store/store";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { fetchUserPosts, deletePost } from "../store/actions/postActions";
+import { fetchUserPosts, deletePost, updatePost } from "../store/actions/postActions";
 
 const mockUser = {
   username: "John Doe",
@@ -37,6 +38,12 @@ const Profile: React.FC = () => {
   const auth = useSelector((state: RootState) => state.auth);
   const userPosts = useSelector((state: RootState) => state.post.userPosts);
   const toast = useToast();
+
+  const [editingPost, setEditingPost] = useState<string | null>(null);
+  const [updatedContent, setUpdatedContent] = useState("");
+  const [updatedImage, setUpdatedImage] = useState<File | null>(null);
+  const [imagePreviewPost, setImagePreviewPost] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (auth.user) {
@@ -64,6 +71,49 @@ const Profile: React.FC = () => {
       });
     }
   };
+
+  const handleUpdatePost = async (postId: string) => {
+    const updatedPostData = { content: updatedContent, image: updatedImage };
+
+    try {
+      await dispatch(updatePost(postId, updatedPostData));
+      toast({
+        title: "Post Updated",
+        description: "Your post has been updated successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setEditingPost(null);
+      setUpdatedContent("");
+      setUpdatedImage(null);
+      setImagePreviewPost(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update the post",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleEditPost = (postId: string, currentContent: string) => {
+    setEditingPost(postId);
+    setUpdatedContent(currentContent);
+  };
+
+  const handlePostImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setUpdatedImage(file);
+      setImagePreviewPost(URL.createObjectURL(file));
+    }
+  };
+
 
 
   return (
@@ -107,8 +157,8 @@ const Profile: React.FC = () => {
 
           <Divider my={6} />
 
-            {/* User's Posts */}
-            <Box>
+              {/* User's Posts */}
+          <Box>
             <Heading as="h3" size="md" mb={4}>
               Your Posts
             </Heading>
@@ -129,7 +179,41 @@ const Profile: React.FC = () => {
                       <Text fontWeight="bold">{post.username}</Text>
                     </Flex>
 
-                    <>
+                    {editingPost === post._id ? (
+                      <>
+                        <Textarea
+                          value={updatedContent}
+                          onChange={(e) => setUpdatedContent(e.target.value)}
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePostImageChange}
+                        />
+                        {imagePreviewPost && (
+                          <Image
+                            src={imagePreviewPost}
+                            alt="Preview"
+                            borderRadius="md"
+                          />
+                        )}
+                        <Button
+                          colorScheme="blue"
+                          mt={2}
+                          onClick={() => handleUpdatePost(post._id)}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          colorScheme="gray"
+                          mt={2}
+                          onClick={() => setEditingPost(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
                         <Text mb={2}>{post.content}</Text>
                         {post.image && (
                           <Image
@@ -145,7 +229,9 @@ const Profile: React.FC = () => {
                           <Button
                             size="sm"
                             colorScheme="blue"
-                          
+                            onClick={() =>
+                              handleEditPost(post._id, post.content)
+                            }
                           >
                             Edit
                           </Button>
@@ -153,14 +239,12 @@ const Profile: React.FC = () => {
                             size="sm"
                             colorScheme="red"
                             onClick={() => handleDeletePost(post._id)}
-
                           >
                             Delete
                           </Button>
                         </Flex>
                       </>
-
-                 
+                    )}
                   </Box>
                 ))
               )}

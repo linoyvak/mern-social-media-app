@@ -7,6 +7,7 @@ export const LIKE_POST = "LIKE_POST";
 export const COMMENT_POST = "COMMENT_POST";
 export const DELETE_POST = "DELETE_POST";
 export const FETCH_USER_POSTS = "FETCH_USER_POSTS";
+export const UPDATE_POST = "UPDATE_POST";
 
 // Fetch all posts
 export const fetchPosts = () => async (dispatch: Dispatch) => {
@@ -97,3 +98,22 @@ export const deletePost = (postId: string) => async (dispatch: Dispatch) => {
   await axios.delete(`http://localhost:5000/api/posts/${postId}`);
   dispatch({ type: DELETE_POST, payload: postId });
 };
+
+export const updatePost =
+  (postId: string, updatedData: { content: string; image?: File | null }) =>
+  async (dispatch: Dispatch) => {
+    const formData = new FormData();
+    formData.append("content", updatedData.content);
+    if (updatedData.image) formData.append("image", updatedData.image);
+
+    const { data } = await axios.put(
+      `http://localhost:5000/api/posts/${postId}`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    dispatch({ type: UPDATE_POST, payload: data });
+  };
+
