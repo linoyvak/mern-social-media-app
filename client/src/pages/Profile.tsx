@@ -203,14 +203,7 @@ const Profile: React.FC = () => {
     dispatch(logout());
     navigate("/login");
   };
-  const users = [
-    { name: "John Doe", image: "/path/to/profile.jpg" },
-    { name: "Jane Doe", image: "/path/to/profile.jpg" },
-    { name: "Alice", image: "/path/to/profile.jpg" },
-    { name: "Bob", image: "/path/to/profile.jpg" },
-    { name: "Charlie", image: "/path/to/profile.jpg" },
-    { name: "David", image: "/path/to/profile.jpg" },
-  ];
+
   return (
     <Box>
       {/* main content */}
@@ -229,8 +222,7 @@ const Profile: React.FC = () => {
               <Avatar
                 size="xl"
                 src={
-                  auth.user?.profileImage ||
-                  "/path/to/default-profile.jpg"
+                  auth.user?.profileImage
                 }
                 mr={4}
               />
@@ -284,10 +276,10 @@ const Profile: React.FC = () => {
               Your Posts
             </Heading>
             <Stack spacing={4}>
-              {userPosts.length === 0 ? (
+              {userPosts?.length === 0 ? (
                 <Text color="gray.500">You haven't posted anything yet.</Text>
               ) : (
-                userPosts.map((post) => (
+                userPosts?.map((post) => (
                   <Box
                     key={post._id}
                     bg="white"
@@ -299,10 +291,10 @@ const Profile: React.FC = () => {
                       <Avatar size="sm" src={
                         auth.user?.profileImage 
                       } mr={2} />
-                      <Text fontWeight="bold">{post.username}</Text>
+                      <Text fontWeight="bold">{post?.username}</Text>
                     </Flex>
 
-                    {editingPost === post._id ? (
+                    {editingPost === post?._id ? (
                       <>
                         <Textarea
                           value={updatedContent}
@@ -323,7 +315,7 @@ const Profile: React.FC = () => {
                         <Button
                           colorScheme="blue"
                           mt={2}
-                          onClick={() => handleUpdatePost(post._id)}
+                          onClick={() => handleUpdatePost(post?._id)}
                         >
                           Save
                         </Button>
@@ -337,12 +329,12 @@ const Profile: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <Text mb={2}>{post.content}</Text>
-                        {post.image && (
+                        <Text mb={2}>{post?.content}</Text>
+                        {post?.image && (
                           <Image
                             height="200px"
                             width="100%"
-                            src={`http://localhost:5000${post.image}`}
+                            src={`http://localhost:5000${post?.image}`}
                             alt="User Post"
                             borderRadius="md"
                             mb={2}
@@ -353,7 +345,7 @@ const Profile: React.FC = () => {
                             size="sm"
                             colorScheme="blue"
                             onClick={() =>
-                              handleEditPost(post._id, post.content)
+                              handleEditPost(post?._id, post?.content)
                             }
                           >
                             Edit
@@ -361,7 +353,7 @@ const Profile: React.FC = () => {
                           <Button
                             size="sm"
                             colorScheme="red"
-                            onClick={() => handleDeletePost(post._id)}
+                            onClick={() => handleDeletePost(post?._id)}
                           >
                             Delete
                           </Button>

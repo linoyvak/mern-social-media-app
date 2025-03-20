@@ -82,8 +82,8 @@ const ChatGPTBox = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
       });
-      const data = await response.json();
-      setAnswer(data.answer);
+      const data = await response?.json();
+      setAnswer(data?.answer);
     } catch (error) {
       console.error("Error:", error);
       setAnswer("אירעה שגיאה, אנא נסה שוב.");

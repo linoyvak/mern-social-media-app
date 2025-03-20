@@ -53,7 +53,7 @@ const Share = () => {
           <Avatar
             size="md"
             name={auth.user?.username || "User Name"}
-            src={auth.user?.profileImage || "/path/to/profile.jpg"}
+            src={auth.user?.profileImage}
             mr={2}
             p={"5px"}
             boxShadow="md"
