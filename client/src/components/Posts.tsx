@@ -92,7 +92,9 @@ const Posts = () => {
         </Text>
       ) : (
         posts.slice(0, visibleCount).map((post: any) => (
-          <Box px={7} py={1}>
+          <Box 
+            key={post?._id}
+          px={7} py={1}>
             <Box
               px={4}
               py={6}
@@ -103,8 +105,8 @@ const Posts = () => {
               <Flex mb={2}>
                 <Avatar
                   size="sm"
-                  name={auth.user?.username || "User Name"}
-                  src={auth.user?.profileImage || "/path/to/profile.jpg"}
+                  name={auth?.user?.username || "User Name"}
+                  src={auth?.user?.profileImage }
                   mr={2}
                   p={"5px"}
                   boxShadow={avatarShadow}
@@ -112,20 +114,20 @@ const Posts = () => {
 
                 <Box mb={2}>
                   <Text fontWeight="bold" fontSize="sm" color="gray.600" mr={2}>
-                    {post.username}
+                    {post?.username}
                   </Text>
                   <Text fontSize="sm" color="gray.500">
-                    {new Date(post.createdAt).toLocaleDateString()} /{" "}
-                    {new Date(post.createdAt).toLocaleTimeString()}
+                    {new Date(post?.createdAt).toLocaleDateString()} /{" "}
+                    {new Date(post?.createdAt).toLocaleTimeString()}
                   </Text>
                 </Box>
               </Flex>
               <Text fontFamily={"body"} fontSize={"sm"} mb={2}>
-                {post.content}
+                {post?.content}
               </Text>
-              {post.image && (
+              {post?.image && (
                 <Image
-                  src={`http://localhost:5000${post.image}`}
+                  src={`http://localhost:5000${post?.image}`}
                   alt="User Post"
                   borderRadius="md"
                   h={"300px"}
@@ -138,14 +140,14 @@ const Posts = () => {
                 {/* like */}
                 <Flex gap={2} align="center">
                   <Icon
-                    onClick={() => handleLike(post._id)}
+                    onClick={() => handleLike(post?._id)}
                     as={FcLike as any}
                     w={6}
                     h={6}
                     cursor="pointer"
                   />
-                  {post.likes.includes(auth.user?._id) ? "Unlike" : "Like"} (
-                  {post.likes.length})
+                  {post?.likes.includes(auth?.user?._id) ? "Unlike" : "Like"} (
+                  {post?.likes.length})
                 </Flex>
 
                 {/* comment */}
@@ -179,7 +181,7 @@ const Posts = () => {
                   onChange={(e) =>
                     setCommentText((prev) => ({
                       ...prev,
-                      [selectedPost._id]: e.target.value,
+                      [selectedPost?._id]: e.target.value,
                     }))
                   }
                 />
@@ -188,7 +190,7 @@ const Posts = () => {
                   size="sm"
                   colorScheme="blue"
                   borderRadius={"20px"}
-                  onClick={() => handleCommentSubmit(selectedPost._id)}
+                  onClick={() => handleCommentSubmit(selectedPost?._id)}
                 >
                   Comment
                 </Button>
@@ -215,20 +217,20 @@ const Posts = () => {
           <ModalBody>
             {selectedPost && (
               <Stack spacing={3}>
-                {selectedPost.comments.map((comment: any) => (
+                {selectedPost?.comments?.map((comment: any) => (
                   <Flex
-                    key={comment.createdAt}
+                    key={comment?.createdAt}
                     align="center"
                     bg="gray.100"
                     p={2}
                     borderRadius="md"
                   >
-                    <Avatar size="xs" src={comment.avatar} mr={2} />
+                    <Avatar size="xs" src={comment?.avatar} mr={2} />
                     <Box>
                       <Text fontSize="sm" fontWeight="bold">
-                        {comment.username}
+                        {comment?.username}
                       </Text>
-                      <Text fontSize="sm">{comment.text}</Text>
+                      <Text fontSize="sm">{comment?.text}</Text>
                     </Box>
                   </Flex>
                 ))}

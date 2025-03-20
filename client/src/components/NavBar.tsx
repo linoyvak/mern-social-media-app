@@ -129,8 +129,7 @@ const NavBar = () => {
             h="30px"
             borderRadius="50%"
             backgroundImage={`url(${
-              currentUser?.profileImage || "/default-avatar.png"
-            })`}
+              currentUser?.profileImage})`}
             backgroundSize="cover"
             backgroundPosition="center"
             border={"1px solid lightgray"}
