@@ -53,7 +53,7 @@ import { FaGraduationCap } from "react-icons/fa";
 const Profile: React.FC = () => {
   const dispatch = useDispatch<any>();
   const auth = useSelector((state: RootState) => state.auth);
-  const userPosts = useSelector((state: RootState) => state.post.posts);
+  const userPosts = useSelector((state: RootState) => state.post.userPosts);
   const toast = useToast();
 
   const [username, setUsername] = useState(auth.user?.username || "");
