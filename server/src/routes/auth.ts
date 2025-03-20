@@ -8,12 +8,10 @@ import path from "path";
 import admin from "firebase-admin";
 import { Post } from "../models/Post";
 
-
 dotenv.config();
 const router = express.Router();
 
-
-// Initialize Firebase Admin SDK
+// Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -25,6 +23,12 @@ if (!admin.apps.length) {
   });
 }
 
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: API endpoints for user authentication and profile management
+ */
 
 // ✅ Configure Multer for profile image uploads
 const storage = multer.diskStorage({
@@ -54,6 +58,35 @@ const generateRefreshToken = (user: any): string => {
 };
 
 // ✅ User Registration
+/**
+ * @swagger
+ * /api/users/register:
+ *   post:
+ *     summary: User Registration
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - username
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       400:
+ *         description: All fields are required or Email already in use
+ */
 router.post(
   "/register",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -89,6 +122,32 @@ router.post(
 );
 
 // ✅ User Login
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: User Login
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *       400:
+ *         description: Invalid email or password
+ */
 router.post(
   "/login",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -121,6 +180,29 @@ router.post(
 );
 
 // ✅ Refresh Token
+/**
+ * @swagger
+ * /api/users/refresh:
+ *   post:
+ *     summary: Refresh Access Token
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: New access token generated successfully
+ *       403:
+ *         description: Refresh token required or Invalid refresh token
+ */
 router.post(
   "/refresh",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -151,11 +233,42 @@ router.post(
 );
 
 // ✅ Logout (Clear Tokens)
+/**
+ * @swagger
+ * /api/users/logout:
+ *   post:
+ *     summary: User Logout
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 router.post("/logout", (req: Request, res: Response) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-// ✅ Google OAuth
+/* @swagger
+ * /api/users/google:
+ *   post:
+ *     summary: OAuth Login with Google
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in successfully with Google OAuth
+ *       400:
+ *         description: Invalid token or error during authentication
+ */
 router.post(
   "/google",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -193,6 +306,42 @@ router.post(
   }
 );
 
+// ✅ Update User Profile
+/**
+ * @swagger
+ * /api/users/update-profile/{userId}:
+ *   put:
+ *     summary: Update User Profile
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Username already in use or validation error
+ *       404:
+ *         description: User not found
+ */
 router.put(
   "/update-profile/:userId",
   upload.single("profileImage"),
@@ -245,5 +394,6 @@ router.put(
     }
   }
 );
+
 
 export default router;
