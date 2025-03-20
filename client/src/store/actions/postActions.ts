@@ -5,6 +5,7 @@ export const FETCH_POSTS = "FETCH_POSTS";
 export const ADD_POST = "ADD_POST";
 export const LIKE_POST = "LIKE_POST";
 export const COMMENT_POST = "COMMENT_POST";
+export const DELETE_POST = "DELETE_POST";
 export const FETCH_USER_POSTS = "FETCH_USER_POSTS";
 
 // Fetch all posts
@@ -12,6 +13,8 @@ export const fetchPosts = () => async (dispatch: Dispatch) => {
   const { data } = await axios.get("http://localhost:5000/api/posts/");
   dispatch({ type: FETCH_POSTS, payload: data });
 };
+
+
 
 // Create a new post
 export const addPost =
@@ -86,4 +89,11 @@ export const fetchUserPosts =
     `http://localhost:5000/api/posts/user/${userId}`
   );
   dispatch({ type: FETCH_USER_POSTS, payload: data });
+};
+
+
+// Delete a post
+export const deletePost = (postId: string) => async (dispatch: Dispatch) => {
+  await axios.delete(`http://localhost:5000/api/posts/${postId}`);
+  dispatch({ type: DELETE_POST, payload: postId });
 };

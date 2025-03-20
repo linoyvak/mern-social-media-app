@@ -12,14 +12,14 @@ import {
   Input,
   FormControl,
   FormLabel,
+  useToast,
 } from "@chakra-ui/react";
 
 import { useEffect } from "react";
 import { RootState } from "../store/store";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { fetchUserPosts } from "../store/actions/postActions";
-
+import { fetchUserPosts, deletePost } from "../store/actions/postActions";
 
 const mockUser = {
   username: "John Doe",
@@ -27,22 +27,6 @@ const mockUser = {
   profileImage: "/path/to/profile.jpg",
 };
 
-const mockPosts = [
-  {
-    id: "1",
-    username: "John Doe",
-    avatar: "/path/to/profile.jpg",
-    content: "Had a great day at the beach! 🌊",
-    image: "/path/to/beach.jpg",
-  },
-  {
-    id: "2",
-    username: "John Doe",
-    avatar: "/path/to/profile.jpg",
-    content: "Loving my new workspace setup! 💻",
-    image: "/path/to/workspace.jpg",
-  },
-];
 
 const Profile: React.FC = () => {
   
@@ -52,12 +36,34 @@ const Profile: React.FC = () => {
   const dispatch = useDispatch<any>();
   const auth = useSelector((state: RootState) => state.auth);
   const userPosts = useSelector((state: RootState) => state.post.userPosts);
+  const toast = useToast();
 
   useEffect(() => {
     if (auth.user) {
       dispatch(fetchUserPosts(auth?.user._id));
     }
   }, [dispatch, auth.user]);
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await dispatch(deletePost(postId));
+      toast({
+        title: "Post Deleted",
+        description: "Your post has been removed.",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
 
   return (
@@ -146,6 +152,8 @@ const Profile: React.FC = () => {
                           <Button
                             size="sm"
                             colorScheme="red"
+                            onClick={() => handleDeletePost(post._id)}
+
                           >
                             Delete
                           </Button>

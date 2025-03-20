@@ -4,6 +4,7 @@ import {
   LIKE_POST,
   COMMENT_POST,
   FETCH_USER_POSTS,
+  DELETE_POST
 } from "../actions/postActions";
 
 interface Post {
@@ -60,6 +61,13 @@ export const postReducer = (state = initialState, action: any): PostState => {
       case FETCH_USER_POSTS:
         return { ...state, userPosts: action.payload };
   
+        case DELETE_POST:
+          console.log(action.payload);
+          return {
+            ...state,
+            posts: state.posts.filter((post) => post._id !== action.payload),
+            userPosts: state.userPosts.filter((post) => post._id !== action.payload),
+          };
    
     default:
       return state;
