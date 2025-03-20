@@ -5,8 +5,11 @@ import cors from "cors";
 import authRoutes from "./routes/auth";
 import postRoutes from "./routes/post";
 import path from "path";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./swagger";
 import axios from "axios";
 
+// Swagger UI endpoint
 
 dotenv.config();
 
@@ -20,7 +23,6 @@ app.use(express.urlencoded({ extended: true })); // ✅ Required for handling fo
 
 // ✅ Serve uploaded images as static files
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-
 
 // MongoDB Connection
 mongoose
@@ -37,6 +39,7 @@ mongoose
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ChatGPT Integration Endpoint
 app.post("/api/chatgpt", async (req: Request, res: Response): Promise<void> => {
@@ -83,8 +86,6 @@ app.post("/api/chatgpt", async (req: Request, res: Response): Promise<void> => {
     }
   }
 });
-
-
 
 app.get("/", (req, res) => {
   res.send("🚀 Server is running with TypeScript!");
