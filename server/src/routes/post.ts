@@ -147,6 +147,24 @@ router.get(
   }
 );
 
+router.delete(
+  "/:postId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+        res.status(404).json({ message: "Post not found" });
+        return;
+      }
+
+      await post.deleteOne();
+      res.json({ message: "Post deleted" });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 
 
 export default router;
